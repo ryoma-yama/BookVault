@@ -13,7 +13,8 @@
     "typecheck": "tsc",
     "typegen": "wrangler types",
     "preview": "pnpm run build && wrangler pages dev",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "migrate:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.15.3",
