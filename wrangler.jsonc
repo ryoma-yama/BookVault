@@ -15,7 +15,8 @@
       "binding": "DB",
       "database_name": "development-db-vault",
       "database_id": "e7800dcd-b2bf-4086-a03c-9137b8103177",
-      "migrations_dir": "drizzle/migrations"
+      "migrations_dir": "drizzle/migrations",
+      "preview_database_id": "development-db-vault"
     }
   ]
   /**
