@@ -14,7 +14,9 @@
     "typegen": "wrangler types",
     "preview": "pnpm run build && wrangler pages dev",
     "cf-typegen": "wrangler types",
-    "migrate:generate": "drizzle-kit generate"
+    "migrate:generate": "drizzle-kit generate",
+    "migrate:local": "wrangler d1 migrations apply development-db-vault --local",
+    "migrate:prod": "wrangler d1 migrations apply development-db-vault --remote"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.15.3",
