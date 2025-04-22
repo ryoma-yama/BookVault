@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const books = sqliteTable("books", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -9,3 +9,9 @@ export const books = sqliteTable("books", {
   publishedDate: text("published_date").notNull(),
   description: text("description").notNull(),
 });
+
+export type BookWithCover = {
+  id: number;
+  title: string;
+  coverUrl: string;
+};
