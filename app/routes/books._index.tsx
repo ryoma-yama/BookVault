@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { drizzle } from "drizzle-orm/d1";
 import { Card, CardContent } from "~/components/ui/card";
 import { books } from "~/db/schema";
@@ -36,16 +36,22 @@ export default function BooksRoute() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {books.map((book) => (
-            <Card key={book.id} className="flex flex-col items-center">
-              <img
-                src={book.coverUrl}
-                alt={book.title}
-                className="w-full h-48 object-cover"
-              />
-              <CardContent className="mt-2 text-center text-sm font-medium">
-                {book.title}
-              </CardContent>
-            </Card>
+            <Link
+              to={`/books/${book.id}`}
+              key={book.id}
+              className="block hover:opacity-90"
+            >
+              <Card className="flex flex-col items-center p-2 h-full">
+                <img
+                  src={book.coverUrl}
+                  alt={book.title}
+                  className="w-full h-48 object-cover"
+                />
+                <CardContent className="mt-2 text-center text-sm font-medium">
+                  {book.title}
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
