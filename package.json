@@ -16,7 +16,8 @@
     "cf-typegen": "wrangler types",
     "migrate:generate": "drizzle-kit generate",
     "migrate:local": "wrangler d1 migrations apply development-db-vault --local",
-    "migrate:prod": "wrangler d1 migrations apply development-db-vault --remote"
+    "migrate:prod": "wrangler d1 migrations apply development-db-vault --remote",
+    "seed": "wrangler d1 execute development-db-vault --local --file=seed.sql"
   },
   "dependencies": {
     "@remix-run/cloudflare": "^2.15.3",
