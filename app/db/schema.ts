@@ -10,8 +10,50 @@ export const books = sqliteTable("books", {
   description: text("description").notNull(),
 });
 
-export type BookWithCover = {
-  id: number;
-  title: string;
-  coverUrl: string;
-};
+export const authors = sqliteTable("authors", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name", { length: 255 }).notNull(),
+});
+
+export const bookAuthors = sqliteTable("book_authors", {
+  bookId: integer("book_id")
+    .notNull()
+    .references(() => books.id),
+  authorId: integer("author_id")
+    .notNull()
+    .references(() => authors.id),
+});
+
+export const tags = sqliteTable("tags", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name", { length: 255 }).notNull(),
+});
+
+export const bookTags = sqliteTable("book_tags", {
+  bookId: integer("book_id")
+    .notNull()
+    .references(() => books.id),
+  tagId: integer("tag_id")
+    .notNull()
+    .references(() => tags.id),
+});
+
+export const bookCopies = sqliteTable("book_copies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  bookId: integer("book_id")
+    .notNull()
+    .references(() => books.id),
+  acquiredDate: text("acquired_date").notNull(),
+  discardedDate: text("discarded_date"),
+});
+
+export const reviews = sqliteTable("reviews", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  bookId: integer("book_id")
+    .notNull()
+    .references(() => books.id),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  rating: integer("rating").notNull(),
+  createdAt: text("created_at").notNull(),
+});

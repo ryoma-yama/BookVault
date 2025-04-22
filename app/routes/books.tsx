@@ -2,7 +2,13 @@ import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { drizzle } from "drizzle-orm/d1";
 import { Card, CardContent } from "~/components/ui/card";
-import { type BookWithCover, books } from "~/db/schema";
+import { books } from "~/db/schema";
+
+type BookWithCover = {
+  id: number;
+  title: string;
+  coverUrl: string;
+};
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const db = drizzle(context.cloudflare.env.DB);
