@@ -57,3 +57,13 @@ export const reviews = sqliteTable("reviews", {
   rating: integer("rating").notNull(),
   createdAt: text("created_at").notNull(),
 });
+
+export const loans = sqliteTable("loans", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  officeBookId: integer("office_book_id")
+    .notNull()
+    .references(() => bookCopies.id),
+  userId: integer("user_id").notNull(),
+  borrowedDate: text("borrowed_date").notNull(),
+  returnedDate: text("returned_date"),
+});
