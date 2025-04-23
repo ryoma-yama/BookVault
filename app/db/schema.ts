@@ -52,7 +52,9 @@ export const reviews = sqliteTable("reviews", {
   bookId: integer("book_id")
     .notNull()
     .references(() => books.id),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
   content: text("content").notNull(),
   rating: integer("rating").notNull(),
   createdAt: text("created_at").notNull(),
@@ -63,7 +65,39 @@ export const loans = sqliteTable("loans", {
   officeBookId: integer("office_book_id")
     .notNull()
     .references(() => bookCopies.id),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
   borrowedDate: text("borrowed_date").notNull(),
   returnedDate: text("returned_date"),
+});
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  role: text("role", { enum: ["admin", "user"] }).notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+export const reservations = sqliteTable("reservations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  officeBookId: integer("office_book_id")
+    .notNull()
+    .references(() => bookCopies.id),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  reservedAt: text("reserved_at").notNull(),
+  fulfilled: integer("fulfilled", { mode: "boolean" }).notNull().default(false),
+});
+
+export const auditLogs = sqliteTable("audit_logs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  actionType: text("action_type", { length: 50 }).notNull(),
+  detail: text("detail").notNull(),
+  createdAt: text("created_at").notNull(),
 });
