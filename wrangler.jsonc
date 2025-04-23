@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "my-remix-app",
+  "name": "book-vault-sample",
   "compatibility_date": "2025-04-10",
   "pages_build_output_dir": "./build/client",
   "observability": {
