@@ -1,8 +1,13 @@
 /**
- * Cloudflare Access によって署名済み・検証済みの JWT から email を抽出する。
- * アプリ側では署名検証は行わない。
+ * JWTまたは環境変数からemailを取得する共通関数。
+ * ローカル開発では DEV_AUTH_EMAIL を使う。
  */
-export function extractEmailFromJwt(jwt: string): string {
+export function getAuthenticatedEmail(request: Request, env: Env): string {
+  const jwt = request.headers.get("cf-access-jwt-assertion");
+
+  if (!jwt && env.DEV_AUTH_EMAIL) return env.DEV_AUTH_EMAIL;
+  if (!jwt) throw new Response("Unauthorized", { status: 401 });
+
   const [, payloadBase64] = jwt.split(".");
   if (!payloadBase64) throw new Error("Invalid JWT format");
 
