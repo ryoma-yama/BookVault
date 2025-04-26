@@ -1,6 +1,7 @@
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
 } from "@remix-run/cloudflare";
 import {
   Form,
@@ -43,6 +44,12 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   }
 
   return Response.json({ displayName: user.displayName });
+};
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "My Profile | BookVault" }
+  ];
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {

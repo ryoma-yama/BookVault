@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "蔵書管理アプリ" },
+    { title: "BookVault" },
     {
       name: "description",
       content: "Cloudflare Pages + Remix による蔵書管理アプリです。",

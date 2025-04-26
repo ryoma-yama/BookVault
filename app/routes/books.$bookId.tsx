@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
@@ -79,6 +79,14 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   };
 
   return Response.json(detail);
+};
+
+export const meta: MetaFunction = ({ data }) => {
+  const book = data as BookDetail;
+  if (!book) {
+    return [{ title: "Book | BookVault" }];
+  }
+  return [{ title: `${book.title} | BookVault` }];
 };
 
 export default function BookDetailPage() {

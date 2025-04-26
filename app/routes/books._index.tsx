@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
 import { drizzle } from "drizzle-orm/d1";
 import { Card, CardContent } from "~/components/ui/card";
@@ -21,6 +21,12 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   }));
 
   return Response.json(booksWithCovers);
+};
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Books | BookVault" }
+  ];
 };
 
 export default function BooksRoute() {
