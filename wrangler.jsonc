@@ -20,7 +20,8 @@
     }
   ],
   "vars": {
-    "DEV_AUTH_EMAIL": "dev@example.com"
+    "DEV_AUTH_EMAIL": "dev@example.com",
+    "GOOGLE_BOOKS_API_KEY": "your-google-books-api-key",
   },
   /**
    * Smart Placement
