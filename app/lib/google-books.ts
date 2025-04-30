@@ -42,8 +42,12 @@ export async function fetchBookInfoByISBN(isbn: string, apiKey: string): Promise
   publishedDate?: string;
   description?: string;
 } | null> {
-  const searchUrl = `${GOOGLE_BOOKS_API_BASE}?q=isbn:${isbn}&key=${apiKey}`;
-  const searchRes = await fetch(searchUrl);
+  const useApiKey = apiKey && apiKey !== "your-google-books-api-key";
+  const searchUrl = new URL(GOOGLE_BOOKS_API_BASE);
+  searchUrl.searchParams.set("q", `isbn:${isbn}`);
+  if (useApiKey) searchUrl.searchParams.set("key", apiKey);
+
+  const searchRes = await fetch(searchUrl.toString());
   if (!searchRes.ok) throw new Error(`Google Books ISBN検索に失敗: ${searchRes.status}`);
 
   const searchJson = await searchRes.json();
