@@ -76,3 +76,13 @@ export async function fetchBookInfoByISBN(isbn: string, apiKey: string): Promise
     description: info.description,
   };
 }
+
+/**
+ * Google Books のボリュームIDから表紙画像のURLを生成する。
+ *
+ * @param googleId - Google Books API のボリュームID（volume ID）
+ * @returns 表紙画像（front cover）の URL。zoom=1 の中サイズ画像を返す。
+ */
+export function getGoogleBooksCoverUrl(googleId: string): string {
+  return `https://books.google.com/books/content?id=${googleId}&printsec=frontcover&img=1&zoom=1&source=gbs_api`;
+}

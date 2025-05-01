@@ -12,7 +12,7 @@ import { Label } from "~/components/ui/label";
 import { books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
-import { fetchBookInfoByISBN } from "~/lib/google-books";
+import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
 
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
@@ -138,6 +138,8 @@ export default function BookNewPage() {
     }
   }, [fetcher.state, fetcher.data]);
 
+  const coverUrl = book?.googleId ? getGoogleBooksCoverUrl(book.googleId) : "";
+
   return (
     <div className="max-w-xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold">書籍の新規登録</h1>
@@ -181,6 +183,7 @@ export default function BookNewPage() {
               <p><strong>タイトル:</strong> {book.title}</p>
               {book.publisher && <p><strong>出版社:</strong> {book.publisher}</p>}
               {book.publishedDate && <p><strong>出版日:</strong> {book.publishedDate}</p>}
+              {coverUrl && <img src={coverUrl} alt="書籍表紙" className="w-32 h-auto border rounded" />}
               {book.description && (
                 <div>
                   <p className="font-semibold">説明:</p>

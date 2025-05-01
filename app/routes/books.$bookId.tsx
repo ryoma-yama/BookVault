@@ -3,6 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { authors, bookAuthors, books } from "~/db/schema";
+import { getGoogleBooksCoverUrl } from "~/lib/google-books";
 
 type BookDetail = {
   id: number;
@@ -67,9 +68,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     publisher: book.publisher,
     publishedDate: book.publishedDate,
     description: book.description,
-    coverUrl: book.googleId
-      ? `https://books.google.com/books/content?id=${book.googleId}&printsec=frontcover&img=1&zoom=1&source=gbs_api`
-      : "",
+    coverUrl: book.googleId ? getGoogleBooksCoverUrl(book.googleId) : "",
     authors: authorRows.map((a) => a.name),
     reviewCount: reviewStatsRaw?.count ?? 0,
     averageRating:
