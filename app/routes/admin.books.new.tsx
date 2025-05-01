@@ -138,8 +138,12 @@ export default function BookNewPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold">書籍の新規登録</h1>
-
+      <h1 className="text-2xl font-bold">書籍の新規登録</h1>
+      <p className="text-sm text-gray-500">
+        書籍のISBNを入力してください。Google Books APIから書籍情報を取得します。
+        <br />
+        書籍情報を確認後、登録ボタンを押してください。
+      </p>
       <Form method="post" className="space-y-4">
         <div className="flex gap-2 items-end">
           <div>
