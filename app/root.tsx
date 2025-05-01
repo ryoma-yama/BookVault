@@ -1,3 +1,4 @@
+// ~/root.tsx
 import type { LinksFunction } from "@remix-run/cloudflare";
 import {
   Links,
@@ -6,9 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-
-import "./tailwind.css";
 import { Toaster } from "sonner";
+import { HeaderNav } from "./components/layout/header-nav";
+import "./tailwind.css";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -33,7 +34,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <HeaderNav />
+        <main className="max-w-2xl mx-auto p-4">
+          {children}
+        </main>
         <Toaster richColors />
         <ScrollRestoration />
         <Scripts />
