@@ -137,8 +137,8 @@ export default function BookNewPage() {
   const coverUrl = book?.googleId ? getGoogleBooksCoverUrl(book.googleId) : "";
 
   return (
-    <div className="max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">書籍の新規登録</h1>
+    <div className="space-y-4">
+      <h1 className="text-xl font-bold">書籍の新規登録</h1>
 
       <Form method="post" className="space-y-4">
         <div className="flex gap-2 items-end">

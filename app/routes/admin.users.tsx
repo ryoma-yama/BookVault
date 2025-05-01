@@ -1,7 +1,7 @@
 // app/routes/admin.users.tsx
 import type {
-    LoaderFunctionArgs,
-    MetaFunction
+  LoaderFunctionArgs,
+  MetaFunction
 } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { users } from "~/db/schema";
@@ -33,8 +33,8 @@ export default function AdminUsersPage() {
   const users = useLoaderData<User[]>();
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">ユーザー一覧</h1>
+    <div className="">
+      <h1 className="text-xl font-bold mb-4">ユーザー一覧</h1>
       <table className="w-full table-auto border">
         <thead>
           <tr className="bg-gray-100">

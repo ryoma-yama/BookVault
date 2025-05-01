@@ -92,8 +92,8 @@ export default function MePage() {
   }, [actionData]);
 
   return (
-    <main className="max-w-md mx-auto p-4 space-y-6">
-      <h1 className="text-xl font-semibold">プロフィール編集</h1>
+    <main className="space-y-4">
+      <h1 className="text-xl font-bold">プロフィール編集</h1>
 
       <Form method="post" className="space-y-4">
         <div>

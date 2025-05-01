@@ -1,6 +1,5 @@
 // ~/routes/header-nav.tsx
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -50,10 +49,6 @@ export function HeaderNav() {
             </NavigationMenuList>
           </NavigationMenu>
         </div>
-
-        <Button asChild variant="outline">
-          <Link to="/user/me">ログイン</Link>
-        </Button>
       </div>
     </header>
   );

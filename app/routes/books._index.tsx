@@ -34,7 +34,7 @@ export default function BooksRoute() {
   const books = useLoaderData<BookWithCover[]>();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4">
       <h1 className="text-xl font-bold">書籍一覧</h1>
       <p className="text-sm text-gray-600">{books.length} 件</p>
 

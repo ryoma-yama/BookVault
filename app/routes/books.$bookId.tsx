@@ -93,7 +93,7 @@ export default function BookDetailPage() {
   const book = useLoaderData<BookDetail>();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4">
       <h1 className="text-xl font-bold">{book.title}</h1>
       <p className="text-gray-500">{book.authors.join(" / ")}</p>
       <div className="flex gap-4 mt-4">
