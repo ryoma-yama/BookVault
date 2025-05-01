@@ -1,5 +1,6 @@
 {
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "eslint.format.enable": true,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
@@ -13,5 +14,11 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "yzhang.markdown-all-in-one"
-  }
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
 }
