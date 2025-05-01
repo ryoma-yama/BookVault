@@ -19,7 +19,7 @@ export function HeaderNav() {
             <NavigationMenuList>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/books">蔵書一覧</Link>
+                  <Link to="/books">書籍一覧</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
@@ -41,6 +41,11 @@ export function HeaderNav() {
                     <li>
                       <NavigationMenuLink asChild>
                         <Link to="/admin/books/new">書籍登録</Link>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <Link to="/admin/books">書籍管理</Link>
                       </NavigationMenuLink>
                     </li>
                   </ul>

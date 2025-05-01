@@ -35,7 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <HeaderNav />
-        <main className="max-w-2xl mx-auto p-4">
+        <main className="container mx-auto p-4">
           {children}
         </main>
         <Toaster richColors />
