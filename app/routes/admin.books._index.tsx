@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from "@remix-run/cloudflare"
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare"
 import { Link, useLoaderData } from "@remix-run/react"
 import type { ColumnDef, SortingState } from "@tanstack/react-table"
 import {
@@ -29,6 +29,8 @@ export type BookRow = {
   publishedDate: string | null
   copiesCount: number
 }
+
+export const meta: MetaFunction = () => [{ title: "Book Management | BookVault" }]
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { db } = await requireAdminUser(request, context)
@@ -96,11 +98,19 @@ const columns: ColumnDef<BookRow>[] = [
   {
     id: "actions",
     header: "操作",
-    cell: ({ row }) => (
-      <Button asChild variant="outline">
-        <Link to={`/admin/books/${(row.original as BookRow).id}/edit`}>編集</Link>
-      </Button>
-    ),
+    cell: ({ row }) => {
+      const id = (row.original as BookRow).id;
+      return (
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/admin/books/${id}/edit`}>編集</Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link to={`/admin/copies/${id}`}>蔵書</Link>
+          </Button>
+        </div>
+      );
+    }
   },
 ]
 
