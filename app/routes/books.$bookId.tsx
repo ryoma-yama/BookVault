@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { authors, bookAuthors, books } from "~/db/schema";
 import { getGoogleBooksCoverUrl } from "~/lib/google-books";
+import { sanitizeHtml } from "~/lib/sanitize.server";
 
 type BookDetail = {
   id: number;
@@ -67,7 +68,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     title: book.title,
     publisher: book.publisher,
     publishedDate: book.publishedDate,
-    description: book.description,
+    description: sanitizeHtml(book.description),
     coverUrl: book.googleId ? getGoogleBooksCoverUrl(book.googleId) : "",
     authors: authorRows.map((a) => a.name),
     reviewCount: reviewStatsRaw?.count ?? 0,
@@ -120,9 +121,7 @@ export default function BookDetailPage() {
           </p>
         </div>
       </div>
-      <div className="mt-4 text-sm whitespace-pre-wrap text-gray-700">
-        {book.description}
-      </div>
+      <div className="mt-4 text-sm prose text-gray-700" dangerouslySetInnerHTML={{ __html: book.description }} />
     </div>
   );
 }

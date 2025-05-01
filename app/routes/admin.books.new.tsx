@@ -1,8 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { Form, useActionData, useFetcher } from "@remix-run/react";
-import createDOMPurify from "dompurify";
 import { eq } from "drizzle-orm";
-import { JSDOM } from "jsdom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -13,9 +11,7 @@ import { books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
 import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
-
-const window = new JSDOM('').window;
-const DOMPurify = createDOMPurify(window);
+import { sanitizeHtml } from "~/lib/sanitize.server";
 
 const insertBookSchema = z.object({
   googleId: z.string(),
@@ -55,7 +51,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   if (data.description) {
-    data.description = DOMPurify.sanitize(data.description, { USE_PROFILES: { html: true } });
+    data.description = sanitizeHtml(data.description);
   }
 
   return Response.json(data);
