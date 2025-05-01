@@ -1,6 +1,8 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { Form, useActionData, useFetcher } from "@remix-run/react";
+import createDOMPurify from "dompurify";
 import { eq } from "drizzle-orm";
+import { JSDOM } from "jsdom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -11,6 +13,9 @@ import { books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
 import { fetchBookInfoByISBN } from "~/lib/google-books";
+
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
 
 const insertBookSchema = z.object({
   googleId: z.string(),
@@ -47,6 +52,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   if (!data) {
       return Response.json(null);
+  }
+
+  if (data.description) {
+    data.description = DOMPurify.sanitize(data.description, { USE_PROFILES: { html: true } });
   }
 
   return Response.json(data);
@@ -108,11 +117,11 @@ export default function BookNewPage() {
     publishedDate?: string;
     description?: string;
   };
-  
+
   const raw = fetcher.data;
   const book: BookData | null =
     raw && typeof raw === "object" && "googleId" in raw ? (raw as BookData) : null;
-  
+
   const handleIsbnSearch = () => {
     if (isbn.trim()) {
       fetcher.load(`/admin/books/new?isbn=${encodeURIComponent(isbn)}`);
@@ -128,7 +137,7 @@ export default function BookNewPage() {
       }
     }
   }, [fetcher.state, fetcher.data]);
-  
+
   return (
     <div className="max-w-xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold">書籍の新規登録</h1>
@@ -150,7 +159,6 @@ export default function BookNewPage() {
               required
               maxLength={13}
               inputMode="numeric"
-
               className="w-[17ch]"
             />
             {actionData?.errors?.isbn13 && <p className="text-sm text-red-500">{actionData.errors.isbn13.join(", ")}</p>}
@@ -176,7 +184,7 @@ export default function BookNewPage() {
               {book.description && (
                 <div>
                   <p className="font-semibold">説明:</p>
-                  <p className="whitespace-pre-line">{book.description}</p>
+                  <div className="prose text-sm" dangerouslySetInnerHTML={{ __html: book.description }} />
                 </div>
               )}
             </div>
