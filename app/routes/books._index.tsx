@@ -3,6 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { drizzle } from "drizzle-orm/d1";
 import { Card, CardContent } from "~/components/ui/card";
 import { books } from "~/db/schema";
+import { getGoogleBooksCoverUrl } from "~/lib/google-books";
 
 type BookWithCover = {
   id: number;
@@ -17,7 +18,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   const booksWithCovers = result.map((book) => ({
     id: book.id,
     title: book.title,
-    coverUrl: `https://books.google.com/books/content?id=${book.googleId}&printsec=frontcover&img=1&zoom=1&source=gbs_api`,
+    coverUrl: getGoogleBooksCoverUrl(book.googleId)
   }));
 
   return Response.json(booksWithCovers);
