@@ -41,6 +41,7 @@
     "react-dom": "^18.2.0",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
+    "turndown": "^7.2.0",
     "tw-animate-css": "^1.2.5",
     "zod": "^3.24.3"
   },
@@ -50,6 +51,7 @@
     "@types/jsdom": "^21.1.7",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "@types/turndown": "^5.0.5",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "drizzle-kit": "^0.30.6",
