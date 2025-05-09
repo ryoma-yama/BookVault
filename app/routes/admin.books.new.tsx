@@ -12,7 +12,7 @@ import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
 import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
 import { convertHtmlToMarkdown } from "~/lib/html-to-markdown.server";
-import { sanitizeHtml } from "~/lib/sanitize.server";
+import { renderMarkdownToHtml } from "~/lib/markdown-to-html.server";
 
 const insertBookSchema = z.object({
   googleId: z.string(),
@@ -48,7 +48,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   if (!data) return Response.json(null)
 
   if (data.description) {
-    data.description = sanitizeHtml(data.description);
+    data.description = await renderMarkdownToHtml(data.description);
   }
 
   return Response.json(data);

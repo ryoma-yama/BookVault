@@ -5,6 +5,7 @@ import { z } from "zod"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import { Textarea } from "~/components/ui/textarea"
 import { books } from "~/db/schema"
 import { writeAuditLog } from "~/lib/audit"
 import { requireAdminUser } from "~/lib/auth"
@@ -110,7 +111,12 @@ export default function BookEditPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">説明</Label>
-          <Input id="description" name="description" defaultValue={book.description ?? ""} />
+          <Textarea
+            id="description"
+            name="description"
+            defaultValue={book.description ?? ""}
+            rows={10}
+          />
         </div>
         <Button type="submit">保存</Button>
       </Form>

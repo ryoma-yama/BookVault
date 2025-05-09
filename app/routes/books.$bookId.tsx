@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { authors, bookAuthors, books } from "~/db/schema";
 import { getGoogleBooksCoverUrl } from "~/lib/google-books";
-import { sanitizeHtml } from "~/lib/sanitize.server";
+import { renderMarkdownToHtml } from "~/lib/markdown-to-html.server";
 
 type BookDetail = {
   id: number;
@@ -68,7 +68,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     title: book.title,
     publisher: book.publisher,
     publishedDate: book.publishedDate,
-    description: sanitizeHtml(book.description),
+    description: await renderMarkdownToHtml(book.description),
     coverUrl: book.googleId ? getGoogleBooksCoverUrl(book.googleId) : "",
     authors: authorRows.map((a) => a.name),
     reviewCount: reviewStatsRaw?.count ?? 0,
