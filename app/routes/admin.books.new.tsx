@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
 import { books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
@@ -157,7 +158,7 @@ export default function BookNewPage() {
               });
             }
           },
-          () => {}
+          () => { }
         );
         isStarted = true;
       } catch (err) {
@@ -170,7 +171,7 @@ export default function BookNewPage() {
 
     return () => {
       if (scanner && isStarted) {
-        scanner.stop().catch(() => {});
+        scanner.stop().catch(() => { });
       }
     };
   }, [scanning, handleIsbnSearch]);
@@ -210,10 +211,10 @@ export default function BookNewPage() {
               </p>
             )}
           </div>
-          <Button type="button" onClick={handleIsbnSearch} disabled={isbn.length !== 13} className="cursor-pointer">
+          <Button type="button" onClick={handleIsbnSearch} disabled={isbn.length !== 13}>
             検索
           </Button>
-          <Button type="button" variant="outline" onClick={() => setScanning(true)} className="cursor-pointer">
+          <Button type="button" variant="outline" onClick={() => setScanning(true)}>
             カメラで読み取る
           </Button>
         </div>
@@ -229,51 +230,45 @@ export default function BookNewPage() {
         )}
 
         {book && (
-          <>
-            <input type="hidden" name="googleId" value={book.googleId} />
-            <input type="hidden" name="title" value={book.title} />
-            <input type="hidden" name="publisher" value={book.publisher ?? ""} />
-            <input type="hidden" name="publishedDate" value={book.publishedDate ?? ""} />
-            <input type="hidden" name="description" value={book.description ?? ""} />
-
-            <div className="border rounded p-4 space-y-2 bg-gray-50">
-              <p>
-                <strong>タイトル:</strong> {book.title}
-              </p>
-              {book.publisher && (
-                <p>
-                  <strong>出版社:</strong> {book.publisher}
-                </p>
-              )}
-              {book.publishedDate && (
-                <p>
-                  <strong>出版日:</strong> {book.publishedDate}
-                </p>
-              )}
-              {coverUrl && (
-                <img
-                  src={coverUrl}
-                  alt="書籍表紙"
-                  className="w-32 h-auto border rounded"
-                />
-              )}
-              {book.description && (
-                <div>
-                  <p className="font-semibold">説明:</p>
-                  <div
-                    className="prose text-sm"
-                    dangerouslySetInnerHTML={{ __html: book.description }}
-                  />
-                </div>
-              )}
-            </div>
-          </>
+          <input type="hidden" name="googleId" value={book.googleId} />
         )}
 
-        <Button type="submit" disabled={!book} className="cursor-pointer">
+        <div className="space-y-2">
+          <Label htmlFor="title">タイトル</Label>
+          <Input id="title" name="title" defaultValue={book?.title ?? ""} required />
+          {actionData?.errors?.title && (
+            <p className="text-sm text-red-500">{actionData.errors.title.join(", ")}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="publisher">出版社</Label>
+          <Input id="publisher" name="publisher" defaultValue={book?.publisher ?? ""} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="publishedDate">出版日</Label>
+          <Input id="publishedDate" name="publishedDate" defaultValue={book?.publishedDate ?? ""} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">説明</Label>
+          <Textarea
+            id="description"
+            name="description"
+            defaultValue={book?.description ?? ""}
+            rows={8}
+          />
+        </div>
+
+        {book && coverUrl && (
+          <img src={coverUrl} alt="書籍表紙" className="w-32 h-auto border rounded" />
+        )}
+
+        <Button type="submit" disabled={!isbn || isbn.length !== 13}>
           登録
         </Button>
       </Form>
     </div>
-  );
+  )
 }
