@@ -28,11 +28,11 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { db } = await requireAdminUser(request, context);
+
   const url = new URL(request.url);
   const isbn = url.searchParams.get("isbn");
   if (!isbn) return Response.json(null);
-
-  const { db } = await requireAdminUser(request, context);
 
   const existing = await db.select().from(books).where(eq(books.isbn13, isbn)).get();
   if (existing) {
