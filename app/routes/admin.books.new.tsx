@@ -137,6 +137,7 @@ export default function BookNewPage() {
     if (!scanning || !scannerRef.current) return;
 
     let scanner: import("html5-qrcode").Html5Qrcode | null = null;
+    let isStarted = false;
 
     const startScanner = async () => {
       const { Html5Qrcode } = await import("html5-qrcode");
@@ -149,14 +150,16 @@ export default function BookNewPage() {
           (decodedText: string) => {
             if (/^\d{13}$/.test(decodedText) && scanner) {
               void scanner.stop().then(() => {
+                isStarted = false;
                 setIsbn(decodedText);
                 setScanning(false);
                 handleIsbnSearch();
               });
             }
           },
-          () => { }
+          () => {}
         );
+        isStarted = true;
       } catch (err) {
         console.error("Scanner error:", err);
         setScanning(false);
@@ -166,7 +169,9 @@ export default function BookNewPage() {
     startScanner();
 
     return () => {
-      if (scanner !== null) scanner.stop().catch(() => { });
+      if (scanner && isStarted) {
+        scanner.stop().catch(() => {});
+      }
     };
   }, [scanning, handleIsbnSearch]);
 
