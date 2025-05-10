@@ -22,6 +22,7 @@ export const meta: MetaFunction = () => [{ title: "書籍編集 | BookVault" }]
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { db } = await requireAdminUser(request, context)
+
   const id = Number(params.bookId)
   if (!id || Number.isNaN(id)) {
     return Response.json({ error: "Invalid book ID" }, { status: 400 })
@@ -84,6 +85,7 @@ type BookRow = {
   publisher: string
   publishedDate: string
   description: string | null
+  googleId: string | null
 }
 
 export default function BookEditPage() {
@@ -94,6 +96,20 @@ export default function BookEditPage() {
     <div className="space-y-6">
       <h1 className="text-xl font-bold">書籍の編集</h1>
       <Form method="post" className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="googleId">Google Books ID</Label>
+          <Input
+            id="googleId"
+            name="googleId"
+            defaultValue={book.googleId ?? ""}
+            readOnly
+            disabled
+            className="opacity-50 cursor-not-allowed"
+          />
+          <p className="text-sm text-muted-foreground">
+            Google Books APIから自動取得されたIDです（編集不可）
+          </p>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="title">タイトル</Label>
           <Input id="title" name="title" defaultValue={book.title} required />
