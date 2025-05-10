@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
-import { books } from "~/db/schema"
+import { authors, bookAuthors, books } from "~/db/schema"
 import { writeAuditLog } from "~/lib/audit"
 import { requireAdminUser } from "~/lib/auth"
 import { convertHtmlToMarkdown } from "~/lib/html-to-markdown.server"
@@ -16,24 +16,36 @@ const updateBookSchema = z.object({
   publisher: z.string(),
   publishedDate: z.string(),
   description: z.string().optional(),
+  authors: z.string().optional()
 })
 
 export const meta: MetaFunction = () => [{ title: "書籍編集 | BookVault" }]
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
   const { db } = await requireAdminUser(request, context)
-
   const id = Number(params.bookId)
   if (!id || Number.isNaN(id)) {
     return Response.json({ error: "Invalid book ID" }, { status: 400 })
   }
 
-  const book = await db.select().from(books).where(eq(books.id, id)).get()
-  if (!book) {
+  const rows = await db
+    .select({
+      book: books,
+      authorName: authors.name
+    })
+    .from(books)
+    .leftJoin(bookAuthors, eq(books.id, bookAuthors.bookId))
+    .leftJoin(authors, eq(bookAuthors.authorId, authors.id))
+    .where(eq(books.id, id))
+
+  if (rows.length === 0) {
     return Response.json({ error: "Not found" }, { status: 404 })
   }
 
-  return Response.json(book)
+  const { book } = rows[0]
+  const authorNames = rows.map(r => r.authorName).filter(Boolean)
+
+  return Response.json({ ...book, authors: authorNames })
 }
 
 export async function action({ request, context, params }: ActionFunctionArgs) {
@@ -51,16 +63,31 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
     return Response.json({ errors: parsed.error.flatten().fieldErrors }, { status: 400 })
   }
 
-  const { title, publisher, publishedDate, description } = parsed.data
+  const { title, publisher, publishedDate, description, authors: authorsRaw } = parsed.data
 
   await db.update(books)
     .set({
       title,
       publisher,
       publishedDate,
-      description: convertHtmlToMarkdown(description ?? ""),
+      description: convertHtmlToMarkdown(description ?? "")
     })
     .where(eq(books.id, id))
+
+  if (authorsRaw) {
+    const authorList = authorsRaw.split(",").map((name) => name.trim()).filter((name) => name)
+
+    await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id))
+
+    for (const name of authorList) {
+      const existing = await db.select().from(authors).where(eq(authors.name, name)).get()
+      const authorId = existing?.id ?? (
+        await db.insert(authors).values({ name }).returning({ id: authors.id })
+      )[0].id
+
+      await db.insert(bookAuthors).values({ bookId: id, authorId })
+    }
+  }
 
   await writeAuditLog({
     db,
@@ -69,13 +96,13 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
     detail: {
       entity: "book",
       action: "update",
-      id,
-    },
+      id
+    }
   })
 
   return new Response(null, {
     status: 302,
-    headers: { Location: "/admin/books" },
+    headers: { Location: "/admin/books" }
   })
 }
 
@@ -86,6 +113,7 @@ type BookRow = {
   publishedDate: string
   description: string | null
   googleId: string | null
+  authors: string[]
 }
 
 export default function BookEditPage() {
@@ -114,6 +142,15 @@ export default function BookEditPage() {
           <Label htmlFor="title">タイトル</Label>
           <Input id="title" name="title" defaultValue={book.title} required />
           {actionData?.errors?.title && <p className="text-sm text-red-500">{actionData.errors.title.join(", ")}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="authors">著者（カンマ区切り）</Label>
+          <Input
+            id="authors"
+            name="authors"
+            defaultValue={book.authors.join(", ")}
+            placeholder="例：山田太郎, 佐藤花子"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="publisher">出版社</Label>

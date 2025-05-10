@@ -8,7 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { books } from "~/db/schema";
+import { authors, bookAuthors, books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
 import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
@@ -16,7 +16,7 @@ import { convertHtmlToMarkdown } from "~/lib/html-to-markdown.server";
 import { renderMarkdownToHtml } from "~/lib/markdown-to-html.server";
 
 const insertBookSchema = z.object({
-  googleId: z.string(),
+  googleId: z.string().optional(),
   isbn13: z.string().length(13),
   title: z.string(),
   publisher: z.string().optional(),
@@ -52,7 +52,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     data.description = await renderMarkdownToHtml(data.description);
   }
 
-  return Response.json(data);
+  return Response.json({
+    ...data,
+    authors: data.authors ?? [],
+  });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -60,22 +63,45 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const formData = await request.formData();
   const raw = Object.fromEntries(formData);
-  const parsed = insertBookSchema.safeParse(raw);
+  const parsed = insertBookSchema.extend({
+    authors: z.string().optional(),
+  }).safeParse(raw);
 
   if (!parsed.success) {
     return Response.json({ errors: parsed.error.flatten().fieldErrors }, { status: 400 });
   }
 
-  const { googleId, isbn13, title, publisher, publishedDate, description } = parsed.data;
+  const { googleId, isbn13, title, publisher, publishedDate, description, authors: authorsRaw } = parsed.data;
 
-  await db.insert(books).values({
-    googleId,
-    isbn13,
-    title,
-    publisher: publisher ?? "",
-    publishedDate: publishedDate ?? "",
-    description: convertHtmlToMarkdown(description ?? ""),
-  });
+  const inserted = await db
+    .insert(books)
+    .values({
+      googleId,
+      isbn13,
+      title,
+      publisher: publisher ?? "",
+      publishedDate: publishedDate ?? "",
+      description: convertHtmlToMarkdown(description ?? ""),
+    })
+    .returning({ id: books.id });
+
+  const bookId = inserted[0].id;
+
+  if (authorsRaw) {
+    const authorList = authorsRaw
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0);
+
+    for (const name of authorList) {
+      const existing = await db.select().from(authors).where(eq(authors.name, name)).get();
+      const authorId = existing?.id ?? (
+        await db.insert(authors).values({ name }).returning({ id: authors.id })
+      )[0].id;
+
+      await db.insert(bookAuthors).values({ bookId, authorId });
+    }
+  }
 
   await writeAuditLog({
     db,
@@ -84,11 +110,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     detail: {
       entity: "book",
       action: "create",
-      data: {
-        googleId,
-        isbn13,
-        title,
-      },
+      data: { googleId, isbn13, title },
     },
   });
 
@@ -112,6 +134,7 @@ export default function BookNewPage() {
     publisher?: string;
     publishedDate?: string;
     description?: string;
+    authors?: string[];
   };
 
   const raw = fetcher.data;
@@ -239,6 +262,16 @@ export default function BookNewPage() {
           {actionData?.errors?.title && (
             <p className="text-sm text-red-500">{actionData.errors.title.join(", ")}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="authors">著者（カンマ区切り）</Label>
+          <Input
+            id="authors"
+            name="authors"
+            defaultValue={book?.authors?.join(", ") ?? ""}
+            placeholder="例：山田太郎, 佐藤花子"
+          />
         </div>
 
         <div className="space-y-2">

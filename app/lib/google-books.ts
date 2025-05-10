@@ -17,6 +17,7 @@ const volumeResponseSchema = z.object({
   id: z.string(),
   volumeInfo: z.object({
     title: z.string(),
+    authors: z.array(z.string()).optional(),
     publisher: z.string().optional(),
     publishedDate: z.string().optional(),
     description: z.string().optional(),
@@ -38,6 +39,7 @@ export async function fetchBookInfoByISBN(isbn: string, apiKey: string): Promise
   googleId: string;
   isbn13?: string;
   title: string;
+  authors?: string[];
   publisher?: string;
   publishedDate?: string;
   description?: string;
@@ -71,6 +73,7 @@ export async function fetchBookInfoByISBN(isbn: string, apiKey: string): Promise
     googleId,
     isbn13,
     title: info.title,
+    authors: info.authors ?? [],
     publisher: info.publisher,
     publishedDate: info.publishedDate,
     description: info.description,
