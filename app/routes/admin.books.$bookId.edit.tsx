@@ -9,7 +9,6 @@ import { Textarea } from "~/components/ui/textarea"
 import { authors, bookAuthors, books } from "~/db/schema"
 import { writeAuditLog } from "~/lib/audit"
 import { requireAdminUser } from "~/lib/auth"
-import { convertHtmlToMarkdown } from "~/lib/html-to-markdown.server"
 
 const updateBookSchema = z.object({
   title: z.string(),
@@ -70,7 +69,7 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
       title,
       publisher,
       publishedDate,
-      description: convertHtmlToMarkdown(description ?? "")
+      description: description ?? ""
     })
     .where(eq(books.id, id))
 

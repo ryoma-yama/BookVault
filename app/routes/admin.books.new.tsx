@@ -12,7 +12,6 @@ import { authors, bookAuthors, books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
 import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
-import { convertHtmlToMarkdown } from "~/lib/html-to-markdown.server";
 import { renderMarkdownToHtml } from "~/lib/markdown-to-html.server";
 
 const insertBookSchema = z.object({
@@ -81,7 +80,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       title,
       publisher: publisher ?? "",
       publishedDate: publishedDate ?? "",
-      description: convertHtmlToMarkdown(description ?? ""),
+      description: description ?? "",
     })
     .returning({ id: books.id });
 
