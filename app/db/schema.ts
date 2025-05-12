@@ -4,15 +4,15 @@ export const books = sqliteTable("books", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   googleId: text("google_id", { length: 100 }).unique(),
   isbn13: text("isbn_13", { length: 13 }).notNull().unique(),
-  title: text("title", { length: 255 }).notNull(),
-  publisher: text("publisher", { length: 255 }).notNull(),
+  title: text("title", { length: 100 }).notNull(),
+  publisher: text("publisher", { length: 100 }).notNull(),
   publishedDate: text("published_date").notNull(),
   description: text("description").notNull(),
 });
 
 export const authors = sqliteTable("authors", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name", { length: 255 }).notNull(),
+  name: text("name", { length: 100 }).notNull(),
 });
 
 export const bookAuthors = sqliteTable("book_authors", {
@@ -26,7 +26,7 @@ export const bookAuthors = sqliteTable("book_authors", {
 
 export const tags = sqliteTable("tags", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name", { length: 255 }).notNull(),
+  name: text("name", { length: 50 }).notNull(),
 });
 
 export const bookTags = sqliteTable("book_tags", {
