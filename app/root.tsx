@@ -35,9 +35,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <HeaderNav />
-        <main className="container mx-auto p-4">
-          {children}
-        </main>
+        <main className="container mx-auto p-4">{children}</main>
         <Toaster richColors />
         <ScrollRestoration />
         <Scripts />

@@ -1,16 +1,16 @@
-import { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare"
-import { Link, useLoaderData } from "@remix-run/react"
-import type { ColumnDef, SortingState } from "@tanstack/react-table"
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import { Link, useLoaderData } from "@remix-run/react";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { isNull } from "drizzle-orm"
-import { ArrowUpDown } from "lucide-react"
-import * as React from "react"
-import { Button } from "~/components/ui/button"
+} from "@tanstack/react-table";
+import { isNull } from "drizzle-orm";
+import { ArrowUpDown } from "lucide-react";
+import * as React from "react";
+import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -18,33 +18,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "~/components/ui/table"
-import { bookCopies, books } from "~/db/schema"
-import { requireAdminUser } from "~/lib/auth"
+} from "~/components/ui/table";
+import { bookCopies, books } from "~/db/schema";
+import { requireAdminUser } from "~/lib/auth";
 
 export type BookRow = {
-  id: number
-  title: string
-  publisher: string
-  publishedDate: string | null
-  copiesCount: number
-}
+  id: number;
+  title: string;
+  publisher: string;
+  publishedDate: string | null;
+  copiesCount: number;
+};
 
-export const meta: MetaFunction = () => [{ title: "Book Management | BookVault" }]
+export const meta: MetaFunction = () => [
+  { title: "Book Management | BookVault" },
+];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { db } = await requireAdminUser(request, context)
+  const { db } = await requireAdminUser(request, context);
 
-  const booksResult = await db.select().from(books)
+  const booksResult = await db.select().from(books);
 
   const copiesResult = await db
     .select({ bookId: bookCopies.bookId })
     .from(bookCopies)
-    .where(isNull(bookCopies.discardedDate))
+    .where(isNull(bookCopies.discardedDate));
 
-  const copyCountMap = new Map<number, number>()
+  const copyCountMap = new Map<number, number>();
   for (const { bookId } of copiesResult) {
-    copyCountMap.set(bookId, (copyCountMap.get(bookId) ?? 0) + 1)
+    copyCountMap.set(bookId, (copyCountMap.get(bookId) ?? 0) + 1);
   }
 
   const result: BookRow[] = booksResult.map((book) => ({
@@ -53,9 +55,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     publisher: book.publisher,
     publishedDate: book.publishedDate ?? null,
     copiesCount: copyCountMap.get(book.id) ?? 0,
-  }))
+  }));
 
-  return Response.json(result)
+  return Response.json(result);
 }
 
 const columns: ColumnDef<BookRow>[] = [
@@ -110,18 +112,18 @@ const columns: ColumnDef<BookRow>[] = [
           </Button>
         </div>
       );
-    }
+    },
   },
-]
+];
 
 function DataTable<TData, TValue>({
   columns,
   data,
 }: {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
     data,
@@ -130,7 +132,7 @@ function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: { sorting },
-  })
+  });
 
   return (
     <div className="rounded-md border">
@@ -143,9 +145,9 @@ function DataTable<TData, TValue>({
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                 </TableHead>
               ))}
             </TableRow>
@@ -157,10 +159,7 @@ function DataTable<TData, TValue>({
               <TableRow key={(row.original as BookRow).id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
@@ -175,11 +174,11 @@ function DataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
 
 export default function AdminBooksIndex() {
-  const data = useLoaderData<BookRow[]>()
+  const data = useLoaderData<BookRow[]>();
 
   return (
     <div className="space-y-4">
@@ -193,5 +192,5 @@ export default function AdminBooksIndex() {
         <DataTable columns={columns} data={data} />
       </div>
     </div>
-  )
+  );
 }

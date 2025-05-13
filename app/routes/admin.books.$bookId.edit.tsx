@@ -1,90 +1,116 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare"
-import { Form, useActionData, useLoaderData } from "@remix-run/react"
-import { eq } from "drizzle-orm"
-import { z } from "zod"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Textarea } from "~/components/ui/textarea"
-import { authors, bookAuthors, books } from "~/db/schema"
-import { writeAuditLog } from "~/lib/audit"
-import { requireAdminUser } from "~/lib/auth"
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/cloudflare";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import { authors, bookAuthors, books } from "~/db/schema";
+import { writeAuditLog } from "~/lib/audit";
+import { requireAdminUser } from "~/lib/auth";
 
 const updateBookSchema = z.object({
   title: z.string(),
   publisher: z.string(),
   publishedDate: z.string(),
   description: z.string().optional(),
-  authors: z.string().optional()
-})
+  authors: z.string().optional(),
+});
 
-export const meta: MetaFunction = () => [{ title: "書籍編集 | BookVault" }]
+export const meta: MetaFunction = () => [{ title: "書籍編集 | BookVault" }];
 
 export async function loader({ params, context, request }: LoaderFunctionArgs) {
-  const { db } = await requireAdminUser(request, context)
-  const id = Number(params.bookId)
+  const { db } = await requireAdminUser(request, context);
+  const id = Number(params.bookId);
   if (!id || Number.isNaN(id)) {
-    return Response.json({ error: "Invalid book ID" }, { status: 400 })
+    return Response.json({ error: "Invalid book ID" }, { status: 400 });
   }
 
   const rows = await db
     .select({
       book: books,
-      authorName: authors.name
+      authorName: authors.name,
     })
     .from(books)
     .leftJoin(bookAuthors, eq(books.id, bookAuthors.bookId))
     .leftJoin(authors, eq(bookAuthors.authorId, authors.id))
-    .where(eq(books.id, id))
+    .where(eq(books.id, id));
 
   if (rows.length === 0) {
-    return Response.json({ error: "Not found" }, { status: 404 })
+    return Response.json({ error: "Not found" }, { status: 404 });
   }
 
-  const { book } = rows[0]
-  const authorNames = rows.map(r => r.authorName).filter(Boolean)
+  const { book } = rows[0];
+  const authorNames = rows.map((r) => r.authorName).filter(Boolean);
 
-  return Response.json({ ...book, authors: authorNames })
+  return Response.json({ ...book, authors: authorNames });
 }
 
 export async function action({ request, context, params }: ActionFunctionArgs) {
-  const { db, user } = await requireAdminUser(request, context)
-  const id = Number(params.bookId)
+  const { db, user } = await requireAdminUser(request, context);
+  const id = Number(params.bookId);
   if (!id || Number.isNaN(id)) {
-    return Response.json({ error: "Invalid book ID" }, { status: 400 })
+    return Response.json({ error: "Invalid book ID" }, { status: 400 });
   }
 
-  const formData = await request.formData()
-  const raw = Object.fromEntries(formData)
-  const parsed = updateBookSchema.safeParse(raw)
+  const formData = await request.formData();
+  const raw = Object.fromEntries(formData);
+  const parsed = updateBookSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return Response.json({ errors: parsed.error.flatten().fieldErrors }, { status: 400 })
+    return Response.json(
+      { errors: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
-  const { title, publisher, publishedDate, description, authors: authorsRaw } = parsed.data
+  const {
+    title,
+    publisher,
+    publishedDate,
+    description,
+    authors: authorsRaw,
+  } = parsed.data;
 
-  await db.update(books)
+  await db
+    .update(books)
     .set({
       title,
       publisher,
       publishedDate,
-      description: description ?? ""
+      description: description ?? "",
     })
-    .where(eq(books.id, id))
+    .where(eq(books.id, id));
 
   if (authorsRaw) {
-    const authorList = authorsRaw.split(",").map((name) => name.trim()).filter((name) => name)
+    const authorList = authorsRaw
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => name);
 
-    await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id))
+    await db.delete(bookAuthors).where(eq(bookAuthors.bookId, id));
 
     for (const name of authorList) {
-      const existing = await db.select().from(authors).where(eq(authors.name, name)).get()
-      const authorId = existing?.id ?? (
-        await db.insert(authors).values({ name }).returning({ id: authors.id })
-      )[0].id
+      const existing = await db
+        .select()
+        .from(authors)
+        .where(eq(authors.name, name))
+        .get();
+      const authorId =
+        existing?.id ??
+        (
+          await db
+            .insert(authors)
+            .values({ name })
+            .returning({ id: authors.id })
+        )[0].id;
 
-      await db.insert(bookAuthors).values({ bookId: id, authorId })
+      await db.insert(bookAuthors).values({ bookId: id, authorId });
     }
   }
 
@@ -95,29 +121,29 @@ export async function action({ request, context, params }: ActionFunctionArgs) {
     detail: {
       entity: "book",
       action: "update",
-      id
-    }
-  })
+      id,
+    },
+  });
 
   return new Response(null, {
     status: 302,
-    headers: { Location: "/admin/books" }
-  })
+    headers: { Location: "/admin/books" },
+  });
 }
 
 type BookRow = {
-  id: number
-  title: string
-  publisher: string
-  publishedDate: string
-  description: string | null
-  googleId: string | null
-  authors: string[]
-}
+  id: number;
+  title: string;
+  publisher: string;
+  publishedDate: string;
+  description: string | null;
+  googleId: string | null;
+  authors: string[];
+};
 
 export default function BookEditPage() {
-  const book = useLoaderData<BookRow>()
-  const actionData = useActionData() as { errors?: Record<string, string[]> }
+  const book = useLoaderData<BookRow>();
+  const actionData = useActionData() as { errors?: Record<string, string[]> };
 
   return (
     <div className="space-y-6">
@@ -140,7 +166,11 @@ export default function BookEditPage() {
         <div className="space-y-2">
           <Label htmlFor="title">タイトル</Label>
           <Input id="title" name="title" defaultValue={book.title} required />
-          {actionData?.errors?.title && <p className="text-sm text-red-500">{actionData.errors.title.join(", ")}</p>}
+          {actionData?.errors?.title && (
+            <p className="text-sm text-red-500">
+              {actionData.errors.title.join(", ")}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="authors">著者（カンマ区切り）</Label>
@@ -153,13 +183,31 @@ export default function BookEditPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="publisher">出版社</Label>
-          <Input id="publisher" name="publisher" defaultValue={book.publisher} required />
-          {actionData?.errors?.publisher && <p className="text-sm text-red-500">{actionData.errors.publisher.join(", ")}</p>}
+          <Input
+            id="publisher"
+            name="publisher"
+            defaultValue={book.publisher}
+            required
+          />
+          {actionData?.errors?.publisher && (
+            <p className="text-sm text-red-500">
+              {actionData.errors.publisher.join(", ")}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="publishedDate">出版日</Label>
-          <Input id="publishedDate" name="publishedDate" defaultValue={book.publishedDate ?? ""} required />
-          {actionData?.errors?.publishedDate && <p className="text-sm text-red-500">{actionData.errors.publishedDate.join(", ")}</p>}
+          <Input
+            id="publishedDate"
+            name="publishedDate"
+            defaultValue={book.publishedDate ?? ""}
+            required
+          />
+          {actionData?.errors?.publishedDate && (
+            <p className="text-sm text-red-500">
+              {actionData.errors.publishedDate.join(", ")}
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="description">説明</Label>
@@ -173,5 +221,5 @@ export default function BookEditPage() {
         <Button type="submit">保存</Button>
       </Form>
     </div>
-  )
+  );
 }

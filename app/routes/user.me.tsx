@@ -47,9 +47,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 };
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "My Profile | BookVault" }
-  ];
+  return [{ title: "My Profile | BookVault" }];
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {

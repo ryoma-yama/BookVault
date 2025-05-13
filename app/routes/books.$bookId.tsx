@@ -121,7 +121,10 @@ export default function BookDetailPage() {
           </p>
         </div>
       </div>
-      <div className="mt-4 text-sm prose text-gray-700" dangerouslySetInnerHTML={{ __html: book.description }} />
+      <div
+        className="mt-4 text-sm prose text-gray-700"
+        dangerouslySetInnerHTML={{ __html: book.description }}
+      />
     </div>
   );
 }

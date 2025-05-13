@@ -18,16 +18,14 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   const booksWithCovers = result.map((book) => ({
     id: book.id,
     title: book.title,
-    coverUrl: getGoogleBooksCoverUrl(book.googleId)
+    coverUrl: getGoogleBooksCoverUrl(book.googleId),
   }));
 
   return Response.json(booksWithCovers);
 };
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Books | BookVault" }
-  ];
+  return [{ title: "Books | BookVault" }];
 };
 
 export default function BooksRoute() {

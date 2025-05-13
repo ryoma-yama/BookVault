@@ -1,8 +1,5 @@
 // app/routes/admin.users.tsx
-import type {
-  LoaderFunctionArgs,
-  MetaFunction
-} from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
 import { users } from "~/db/schema";
 import { requireAdminUser } from "~/lib/auth";
@@ -24,10 +21,8 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 };
 
 export const meta: MetaFunction = () => {
-    return [
-      { title: "User Management | BookVault" }
-    ];
-  };
+  return [{ title: "User Management | BookVault" }];
+};
 
 export default function AdminUsersPage() {
   const users = useLoaderData<User[]>();
@@ -52,7 +47,9 @@ export default function AdminUsersPage() {
               <td className="border px-2 py-1">{u.email}</td>
               <td className="border px-2 py-1">{u.displayName}</td>
               <td className="border px-2 py-1">{u.role}</td>
-              <td className="border px-2 py-1">{new Date(u.createdAt).toLocaleDateString()}</td>
+              <td className="border px-2 py-1">
+                {new Date(u.createdAt).toLocaleDateString()}
+              </td>
             </tr>
           ))}
         </tbody>

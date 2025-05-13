@@ -14,7 +14,9 @@ export function HeaderNav() {
     <header className="border-b px-4 py-2">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-8">
-          <Link to="/" className="text-xl font-bold">BookVault</Link>
+          <Link to="/" className="text-xl font-bold">
+            BookVault
+          </Link>
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>

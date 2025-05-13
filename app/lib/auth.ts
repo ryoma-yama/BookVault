@@ -41,11 +41,18 @@ export function getAuthenticatedEmail(request: Request, env: Env): string {
  * @returns データベース接続インスタンスとユーザー情報
  * @throws {Response} 401 - 認証されていない場合
  */
-export async function requireAuthenticatedUser(request: Request, context: LoaderFunctionArgs["context"]) {
+export async function requireAuthenticatedUser(
+  request: Request,
+  context: LoaderFunctionArgs["context"],
+) {
   const email = getAuthenticatedEmail(request, context.cloudflare.env);
   const db = drizzle(context.cloudflare.env.DB);
 
-  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .get();
 
   if (!user) {
     throw new Response("Unauthorized", { status: 401 });
@@ -64,7 +71,10 @@ export async function requireAuthenticatedUser(request: Request, context: Loader
  * @throws {Response} 401 - 認証されていない場合
  * @throws {Response} 403 - 管理者権限がない場合
  */
-export async function requireAdminUser(request: Request, context: LoaderFunctionArgs["context"]) {
+export async function requireAdminUser(
+  request: Request,
+  context: LoaderFunctionArgs["context"],
+) {
   const { db, user } = await requireAuthenticatedUser(request, context);
 
   if (user.role !== "admin") {
