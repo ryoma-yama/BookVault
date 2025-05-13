@@ -154,7 +154,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
     },
   });
 
-  return new Response(null, { status: 302, headers: { Location: "/books" } });
+  return new Response(null, {
+    status: 302,
+    headers: { Location: "/admin/books" },
+  });
 }
 
 export default function BookNewPage() {
