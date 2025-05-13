@@ -182,11 +182,15 @@ export default function BookNewPage() {
       ? (raw as BookData)
       : null;
 
-  const handleIsbnSearch = useCallback(() => {
-    if (isbn.trim()) {
-      fetcher.load(`/admin/books/new?isbn=${encodeURIComponent(isbn)}`);
-    }
-  }, [isbn, fetcher]);
+  const handleIsbnSearch = useCallback(
+    (value?: string) => {
+      const target = value ?? isbn;
+      if (target.trim()) {
+        fetcher.load(`/admin/books/new?isbn=${encodeURIComponent(target)}`);
+      }
+    },
+    [isbn, fetcher],
+  );
 
   useEffect(() => {
     if (!scanning || !scannerRef.current) return;
@@ -207,7 +211,7 @@ export default function BookNewPage() {
                 isStarted = false;
                 setIsbn(decodedText);
                 setScanning(false);
-                handleIsbnSearch();
+                handleIsbnSearch(decodedText);
               });
             }
           },
@@ -266,7 +270,7 @@ export default function BookNewPage() {
           </div>
           <Button
             type="button"
-            onClick={handleIsbnSearch}
+            onClick={() => handleIsbnSearch()}
             disabled={isbn.length !== 13}
           >
             検索
