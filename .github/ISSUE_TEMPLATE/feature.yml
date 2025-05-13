@@ -1,0 +1,63 @@
+name: 新規機能の実装
+description: 新しい画面・機能を追加するときに使用するテンプレートです
+title: "[Feature] "
+
+body:
+  - type: input
+    id: feature-title
+    attributes:
+      label: 機能名
+      description: 機能や画面の名前を記載してください（例：プロフィール編集）
+      placeholder: 機能タイトルを入力
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: この機能の目的と背景、簡単な説明
+      placeholder: このIssueで実現することを記述
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: 要件・仕様
+      description: ユーザー操作、バリデーション、API連携など具体的な要件を記述
+      placeholder: |
+        - 入力バリデーションを追加する
+        - PATCH /api/users/me を呼び出す
+    validations:
+      required: true
+
+  - type: textarea
+    id: screen-info
+    attributes:
+      label: 対象画面・範囲
+      description: 対象となる画面のパスやコンポーネント名
+      placeholder: 例：/users/me、UserEditForm.tsx
+    validations:
+      required: false
+
+  - type: textarea
+    id: done-criteria
+    attributes:
+      label: 完了条件
+      description: このIssueが完了したと判断できる基準
+      placeholder: |
+        - 機能がUI上で正常に動作する
+        - デザインに崩れがない
+        - エラーがハンドリングされている
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考
+      description: 関連Issue、Figmaリンク、設計メモなど
+      placeholder: 参考資料や補足事項があれば記載
+    validations:
+      required: false
