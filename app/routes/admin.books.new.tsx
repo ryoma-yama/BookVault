@@ -165,6 +165,7 @@ export default function BookNewPage() {
   const scannerRef = useRef<HTMLDivElement>(null);
   type FetcherResult = { error?: string } | null;
   const fetcherData = fetcher.data as FetcherResult;
+  const [descriptionMd, setDescriptionMd] = useState("");
 
   type BookData = {
     googleId: string;
@@ -233,6 +234,16 @@ export default function BookNewPage() {
   }, [scanning, handleIsbnSearch]);
 
   const coverUrl = book?.googleId ? getGoogleBooksCoverUrl(book.googleId) : "";
+
+  useEffect(() => {
+    if (!book?.description) return;
+
+    import("turndown").then(({ default: TurndownService }) => {
+      const service = new TurndownService();
+      const md = service.turndown(book.description || "");
+      setDescriptionMd(md);
+    });
+  }, [book?.description]);
 
   return (
     <div className="space-y-4">
@@ -385,7 +396,7 @@ export default function BookNewPage() {
           <Textarea
             id="description"
             name="description"
-            defaultValue={book?.description ?? ""}
+            defaultValue={descriptionMd}
             rows={8}
             required
             maxLength={10000}
