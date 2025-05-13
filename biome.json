@@ -14,7 +14,11 @@
       ".cache/**",
       "public/**",
       "docs/**",
-      "**/*.d.ts"
+      "**/*.d.ts",
+      "**/*.json",
+      "**/*.jsonc",
+      "drizzle/**",
+      "app/components/ui/**"
     ]
   },
   "formatter": {
