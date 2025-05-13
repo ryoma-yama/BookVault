@@ -161,7 +161,6 @@ export default function BookNewPage() {
   const actionData = useActionData() as { errors?: Record<string, string[]> };
   const fetcher = useFetcher();
   const [isbn, setIsbn] = useState("");
-  const [title, setTitle] = useState("");
   const [scanning, setScanning] = useState(false);
   const scannerRef = useRef<HTMLDivElement>(null);
   type FetcherResult = { error?: string } | null;
@@ -230,11 +229,10 @@ export default function BookNewPage() {
   }, [scanning, handleIsbnSearch]);
 
   const coverUrl = book?.googleId ? getGoogleBooksCoverUrl(book.googleId) : "";
-  const isValid = isbn.length === 13 && title.trim() !== "";
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">書籍の新規登録</h1>
+      <h1 className="text-2xl font-bold">書籍登録</h1>
       <p className="text-sm text-gray-500">
         書籍のISBNを入力してください。Google Books APIから書籍情報を取得します。
         <br />
@@ -242,8 +240,8 @@ export default function BookNewPage() {
       </p>
       <Form method="post" className="space-y-4">
         <div className="flex gap-2 items-end">
-          <div>
-            <Label htmlFor="isbn13">ISBN (13桁)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="isbn13">ISBN (13桁) ※必須</Label>
             <Input
               id="isbn13"
               name="isbn13"
@@ -255,6 +253,7 @@ export default function BookNewPage() {
                 }
               }}
               required
+              minLength={13}
               maxLength={13}
               inputMode="numeric"
               className="w-[17ch]"
@@ -314,14 +313,13 @@ export default function BookNewPage() {
         {book && <input type="hidden" name="googleId" value={book.googleId} />}
 
         <div className="space-y-2">
-          <Label htmlFor="title">タイトル</Label>
+          <Label htmlFor="title">タイトル ※必須</Label>
           <Input
             id="title"
             name="title"
             defaultValue={book?.title ?? ""}
             required
             maxLength={100}
-            onChange={(e) => setTitle(e.target.value)}
           />
           {actionData?.errors?.title && (
             <p className="text-sm text-red-500" role="alert">
@@ -347,7 +345,7 @@ export default function BookNewPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="publisher">出版社</Label>
+          <Label htmlFor="publisher">出版社 ※必須</Label>
           <Input
             id="publisher"
             name="publisher"
@@ -363,7 +361,7 @@ export default function BookNewPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="publishedDate">出版日</Label>
+          <Label htmlFor="publishedDate">出版日 ※必須</Label>
           <Input
             id="publishedDate"
             name="publishedDate"
@@ -379,7 +377,7 @@ export default function BookNewPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">説明</Label>
+          <Label htmlFor="description">説明 ※必須（Markdown使用可）</Label>
           <Textarea
             id="description"
             name="description"
@@ -403,9 +401,7 @@ export default function BookNewPage() {
           />
         )}
 
-        <Button type="submit" disabled={!isValid}>
-          登録
-        </Button>
+        <Button type="submit">登録</Button>
       </Form>
     </div>
   );
