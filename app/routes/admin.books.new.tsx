@@ -1,8 +1,11 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/cloudflare";
 import { Form, useActionData, useFetcher } from "@remix-run/react";
 import { eq } from "drizzle-orm";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -11,16 +14,21 @@ import { Textarea } from "~/components/ui/textarea";
 import { authors, bookAuthors, books } from "~/db/schema";
 import { writeAuditLog } from "~/lib/audit";
 import { requireAdminUser } from "~/lib/auth";
-import { fetchBookInfoByISBN, getGoogleBooksCoverUrl } from "~/lib/google-books";
+import {
+  fetchBookInfoByISBN,
+  getGoogleBooksCoverUrl,
+} from "~/lib/google-books";
 import { renderMarkdownToHtml } from "~/lib/markdown-to-html.server";
 
 const insertBookSchema = z.object({
-  googleId: z.string().optional(),
-  isbn13: z.string().length(13),
-  title: z.string(),
-  publisher: z.string().optional(),
-  publishedDate: z.string().optional(),
-  description: z.string().optional(),
+  googleId: z.string().max(100).optional(),
+  isbn13: z.string().length(13, "13桁の数字を入力してください"),
+  title: z.string().min(1, "タイトルは必須です").max(100),
+  publisher: z.string().min(1, "出版社は必須です").max(100),
+  publishedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD の形式で入力してください"),
+  description: z.string().min(1, "説明は必須です").max(10000),
 });
 
 export const meta: MetaFunction = () => {
@@ -34,18 +42,21 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const isbn = url.searchParams.get("isbn");
   if (!isbn) return Response.json(null);
 
-  const existing = await db.select().from(books).where(eq(books.isbn13, isbn)).get();
+  const existing = await db
+    .select()
+    .from(books)
+    .where(eq(books.isbn13, isbn))
+    .get();
   if (existing) {
     return Response.json(
       { error: "このISBNはすでに登録されています", isDuplicate: true },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
   const apiKey = context.cloudflare.env.GOOGLE_BOOKS_API_KEY;
   const data = await fetchBookInfoByISBN(isbn, apiKey);
-
-  if (!data) return Response.json(null)
+  if (!data) return Response.json(null);
 
   if (data.description) {
     data.description = await renderMarkdownToHtml(data.description);
@@ -62,29 +73,50 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const formData = await request.formData();
   const raw = Object.fromEntries(formData);
-  const parsed = insertBookSchema.extend({
-    authors: z.string().optional(),
-  }).safeParse(raw);
+  const parsed = insertBookSchema
+    .extend({ authors: z.string().optional() })
+    .safeParse(raw);
 
   if (!parsed.success) {
-    return Response.json({ errors: parsed.error.flatten().fieldErrors }, { status: 400 });
+    return Response.json(
+      { errors: parsed.error.flatten().fieldErrors },
+      { status: 400 },
+    );
   }
 
-  const { googleId, isbn13, title, publisher, publishedDate, description, authors: authorsRaw } = parsed.data;
+  const {
+    googleId,
+    isbn13,
+    title,
+    publisher,
+    publishedDate,
+    description,
+    authors: authorsRaw,
+  } = parsed.data;
 
-  const inserted = await db
-    .insert(books)
-    .values({
-      googleId,
-      isbn13,
-      title,
-      publisher: publisher ?? "",
-      publishedDate: publishedDate ?? "",
-      description: description ?? "",
-    })
-    .returning({ id: books.id });
-
-  const bookId = inserted[0].id;
+  let bookId: number;
+  try {
+    const inserted = await db
+      .insert(books)
+      .values({
+        googleId,
+        isbn13,
+        title,
+        publisher: publisher ?? "",
+        publishedDate: publishedDate ?? "",
+        description: description ?? "",
+      })
+      .returning({ id: books.id });
+    bookId = inserted[0].id;
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message.includes("UNIQUE")) {
+      return Response.json(
+        { errors: { isbn13: ["このISBNはすでに登録されています"] } },
+        { status: 409 },
+      );
+    }
+    throw err;
+  }
 
   if (authorsRaw) {
     const authorList = authorsRaw
@@ -93,10 +125,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .filter((name) => name.length > 0);
 
     for (const name of authorList) {
-      const existing = await db.select().from(authors).where(eq(authors.name, name)).get();
-      const authorId = existing?.id ?? (
-        await db.insert(authors).values({ name }).returning({ id: authors.id })
-      )[0].id;
+      const existing = await db
+        .select()
+        .from(authors)
+        .where(eq(authors.name, name))
+        .get();
+      const authorId =
+        existing?.id ??
+        (
+          await db
+            .insert(authors)
+            .values({ name })
+            .returning({ id: authors.id })
+        )[0].id;
 
       await db.insert(bookAuthors).values({ bookId, authorId });
     }
@@ -113,18 +154,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     },
   });
 
-  return new Response(null, {
-    status: 302,
-    headers: { Location: "/books" },
-  });
+  return new Response(null, { status: 302, headers: { Location: "/books" } });
 }
 
 export default function BookNewPage() {
   const actionData = useActionData() as { errors?: Record<string, string[]> };
   const fetcher = useFetcher();
   const [isbn, setIsbn] = useState("");
+  const [title, setTitle] = useState("");
   const [scanning, setScanning] = useState(false);
   const scannerRef = useRef<HTMLDivElement>(null);
+  type FetcherResult = { error?: string } | null;
+  const fetcherData = fetcher.data as FetcherResult;
 
   type BookData = {
     googleId: string;
@@ -138,7 +179,9 @@ export default function BookNewPage() {
 
   const raw = fetcher.data;
   const book: BookData | null =
-    raw && typeof raw === "object" && "googleId" in raw ? (raw as BookData) : null;
+    raw && typeof raw === "object" && "googleId" in raw
+      ? (raw as BookData)
+      : null;
 
   const handleIsbnSearch = useCallback(() => {
     if (isbn.trim()) {
@@ -147,18 +190,7 @@ export default function BookNewPage() {
   }, [isbn, fetcher]);
 
   useEffect(() => {
-    if (fetcher.state === "idle") {
-      if (fetcher.data === null) {
-        toast.error("書籍情報が見つかりませんでした");
-      } else if (typeof fetcher.data === "object" && "error" in fetcher.data) {
-        toast.error(fetcher.data.error as string);
-      }
-    }
-  }, [fetcher.state, fetcher.data]);
-
-  useEffect(() => {
     if (!scanning || !scannerRef.current) return;
-
     let scanner: import("html5-qrcode").Html5Qrcode | null = null;
     let isStarted = false;
 
@@ -180,7 +212,7 @@ export default function BookNewPage() {
               });
             }
           },
-          () => { }
+          () => {},
         );
         isStarted = true;
       } catch (err) {
@@ -190,15 +222,15 @@ export default function BookNewPage() {
     };
 
     startScanner();
-
     return () => {
       if (scanner && isStarted) {
-        scanner.stop().catch(() => { });
+        scanner.stop().catch(() => {});
       }
     };
   }, [scanning, handleIsbnSearch]);
 
   const coverUrl = book?.googleId ? getGoogleBooksCoverUrl(book.googleId) : "";
+  const isValid = isbn.length === 13 && title.trim() !== "";
 
   return (
     <div className="space-y-4">
@@ -228,38 +260,73 @@ export default function BookNewPage() {
               className="w-[17ch]"
             />
             {actionData?.errors?.isbn13 && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-red-500" role="alert">
                 {actionData.errors.isbn13.join(", ")}
               </p>
             )}
           </div>
-          <Button type="button" onClick={handleIsbnSearch} disabled={isbn.length !== 13}>
+          <Button
+            type="button"
+            onClick={handleIsbnSearch}
+            disabled={isbn.length !== 13}
+          >
             検索
           </Button>
-          <Button type="button" variant="outline" onClick={() => setScanning(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setScanning(true)}
+          >
             カメラで読み取る
           </Button>
         </div>
 
         {scanning && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex flex-col items-center justify-center">
-            <div className="text-white mb-2">カメラをISBNバーコードに向けてください</div>
-            <div id="isbn-scanner" ref={scannerRef} className="w-[300px] h-[300px] bg-white" />
-            <button onClick={() => setScanning(false)} className="mt-4 text-white underline">
+            <div className="text-white mb-2">
+              カメラをISBNバーコードに向けてください
+            </div>
+            <div
+              id="isbn-scanner"
+              ref={scannerRef}
+              className="w-[300px] h-[300px] bg-white"
+            />
+            <button
+              onClick={() => setScanning(false)}
+              className="mt-4 text-white underline"
+            >
               閉じる
             </button>
           </div>
         )}
 
-        {book && (
-          <input type="hidden" name="googleId" value={book.googleId} />
+        {fetcher.state === "idle" && fetcher.data === null && (
+          <p className="text-sm text-red-500" role="alert">
+            書籍情報が見つかりませんでした
+          </p>
         )}
+        {fetcher.state === "idle" && fetcherData?.error && (
+          <p className="text-sm text-red-500" role="alert">
+            {fetcherData.error}
+          </p>
+        )}
+
+        {book && <input type="hidden" name="googleId" value={book.googleId} />}
 
         <div className="space-y-2">
           <Label htmlFor="title">タイトル</Label>
-          <Input id="title" name="title" defaultValue={book?.title ?? ""} required />
+          <Input
+            id="title"
+            name="title"
+            defaultValue={book?.title ?? ""}
+            required
+            maxLength={100}
+            onChange={(e) => setTitle(e.target.value)}
+          />
           {actionData?.errors?.title && (
-            <p className="text-sm text-red-500">{actionData.errors.title.join(", ")}</p>
+            <p className="text-sm text-red-500" role="alert">
+              {actionData.errors.title.join(", ")}
+            </p>
           )}
         </div>
 
@@ -270,17 +337,45 @@ export default function BookNewPage() {
             name="authors"
             defaultValue={book?.authors?.join(", ") ?? ""}
             placeholder="例：山田太郎, 佐藤花子"
+            maxLength={100}
           />
+          {actionData?.errors?.authors && (
+            <p className="text-sm text-red-500" role="alert">
+              {actionData.errors.authors.join(", ")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="publisher">出版社</Label>
-          <Input id="publisher" name="publisher" defaultValue={book?.publisher ?? ""} />
+          <Input
+            id="publisher"
+            name="publisher"
+            defaultValue={book?.publisher ?? ""}
+            required
+            maxLength={100}
+          />
+          {actionData?.errors?.publisher && (
+            <p className="text-sm text-red-500" role="alert">
+              {actionData.errors.publisher.join(", ")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="publishedDate">出版日</Label>
-          <Input id="publishedDate" name="publishedDate" defaultValue={book?.publishedDate ?? ""} />
+          <Input
+            id="publishedDate"
+            name="publishedDate"
+            type="date"
+            defaultValue={book?.publishedDate ?? ""}
+            required
+          />
+          {actionData?.errors?.publishedDate && (
+            <p className="text-sm text-red-500" role="alert">
+              {actionData.errors.publishedDate.join(", ")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -290,17 +385,28 @@ export default function BookNewPage() {
             name="description"
             defaultValue={book?.description ?? ""}
             rows={8}
+            required
+            maxLength={10000}
           />
+          {actionData?.errors?.description && (
+            <p className="text-sm text-red-500" role="alert">
+              {actionData.errors.description.join(", ")}
+            </p>
+          )}
         </div>
 
         {book && coverUrl && (
-          <img src={coverUrl} alt="書籍表紙" className="w-32 h-auto border rounded" />
+          <img
+            src={coverUrl}
+            alt="書籍表紙"
+            className="w-32 h-auto border rounded"
+          />
         )}
 
-        <Button type="submit" disabled={!isbn || isbn.length !== 13}>
+        <Button type="submit" disabled={!isValid}>
           登録
         </Button>
       </Form>
     </div>
-  )
+  );
 }
