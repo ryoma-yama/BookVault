@@ -282,11 +282,6 @@ export default function BookNewPage() {
               inputMode="numeric"
               className="w-[17ch]"
             />
-            {actionData?.errors?.isbn13 && (
-              <p className="text-sm text-red-500" role="alert">
-                {actionData.errors.isbn13.join(", ")}
-              </p>
-            )}
           </div>
           <Button
             type="button"
@@ -323,6 +318,11 @@ export default function BookNewPage() {
           </div>
         )}
 
+        {actionData?.errors?.isbn13 && (
+          <p className="text-sm text-red-500" role="alert">
+            {actionData.errors.isbn13.join(", ")}
+          </p>
+        )}
         {fetcher.state === "idle" && fetcher.data === null && (
           <p className="text-sm text-red-500" role="alert">
             書籍情報が見つかりませんでした
