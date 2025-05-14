@@ -160,6 +160,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   });
 }
 
+function isISBN13(code: string): boolean {
+  return (
+    code.length === 13 && (code.startsWith("978") || code.startsWith("979"))
+  );
+}
+
 export default function BookNewPage() {
   const actionData = useActionData() as { errors?: Record<string, string[]> };
   const fetcher = useFetcher();
@@ -210,7 +216,7 @@ export default function BookNewPage() {
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText: string) => {
-            if (/^\d{13}$/.test(decodedText) && scanner) {
+            if (isISBN13(decodedText) && scanner) {
               void scanner.stop().then(() => {
                 isStarted = false;
                 setIsbn(decodedText);
