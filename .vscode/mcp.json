@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "remix Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/remix-run/remix"
+    }
+  }
+}
