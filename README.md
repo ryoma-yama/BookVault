@@ -1,47 +1,115 @@
-# Welcome to Remix + Cloudflare!
+# BookVault
 
-- 📖 [Remix docs](https://remix.run/docs)
-- 📖 [Remix Cloudflare docs](https://remix.run/guides/vite#cloudflare)
+BookVault is a simple library management app for individuals or small teams. It lets you track books, lending, and user profiles. Built with Remix and Cloudflare Pages, it uses D1 for storage and supports Google Books integration and Cloudflare Access authentication.
 
-## Development
+- [Remix docs](https://remix.run/docs)
+- [Remix Cloudflare docs](https://remix.run/guides/vite#cloudflare)
 
-Run the dev server:
+# Development
 
-```sh
-npm run dev
-```
-
-To run Wrangler:
+Install dependencies:
 
 ```sh
-npm run build
-npm run start
+pnpm install
 ```
 
-## Typegen
-
-Generate types for your Cloudflare bindings in `wrangler.toml`:
+Apply database migrations (required before first run):
 
 ```sh
-npm run typegen
+pnpm migrate:local
 ```
 
-You will need to rerun typegen whenever you make changes to `wrangler.toml`.
-
-## Deployment
-
-First, build your app for production:
+Seed initial data (optional):
 
 ```sh
-npm run build
+pnpm seed:local
 ```
 
-Then, deploy your app to Cloudflare Pages:
+Start the development server:
 
 ```sh
-npm run deploy
+pnpm dev
 ```
 
-## Styling
+# Type Generation
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+Generate types for Cloudflare bindings after editing `wrangler.toml`:
+
+```sh
+pnpm typegen
+```
+
+# Database Migrations & Seed
+
+Generate migration files:
+
+```sh
+pnpm migrate:generate
+```
+
+Apply migrations (local):
+
+```sh
+pnpm migrate:local
+```
+
+Seed database (local):
+
+```sh
+pnpm seed:local
+```
+
+# Build & Deploy
+
+Build for production:
+
+```sh
+pnpm build
+```
+
+Deploy to Cloudflare Pages:
+
+```sh
+pnpm deploy:app
+```
+
+Preview deployment locally:
+
+```sh
+pnpm preview
+```
+
+# Code Quality
+
+Format code:
+
+```sh
+pnpm format
+```
+
+Lint code:
+
+```sh
+pnpm lint
+```
+
+Type check:
+
+```sh
+pnpm typecheck
+```
+
+# Styling
+
+Tailwind CSS is preconfigured. Edit `app/tailwind.css` as needed.
+
+# Tech Stack
+
+- Remix (Cloudflare Pages adapter)
+- Cloudflare Pages, D1, Access
+- Drizzle ORM
+- Tailwind CSS
+- Google Books API
+- TypeScript, Vite
+
+For requirements and architecture, see `docs/01-要件定義.md` (Japanese).
