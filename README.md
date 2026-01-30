@@ -1,7 +1,74 @@
 # BookVault
 
+## 日本語
+
+### 概要
+
+BookVault は、個人や小規模チーム向けのシンプルな蔵書管理アプリケーションです。書籍の管理、貸出・返却の追跡、ユーザープロフィール管理などの機能を提供します。
+
+### 主な特徴
+
+- 📚 **蔵書管理**: 書籍情報（タイトル、著者、ISBN、出版社など）の登録・編集・削除
+- 🔍 **検索機能**: タイトル、著者、出版社、タグによる書籍検索
+- 📖 **貸出管理**: 書籍の貸出・返却履歴の追跡
+- 🏷️ **タグ管理**: 書籍へのタグ付けとタグによるフィルタリング
+- 📱 **Google Books連携**: ISBNによる書籍情報の自動取得
+- 🔐 **認証**: Cloudflare Accessによる安全な認証システム
+- 👤 **ユーザー管理**: プロフィール設定と権限管理（管理者/一般ユーザー）
+
+### 技術スタック
+
+- **フレームワーク**: Remix (Cloudflare Pages対応)
+- **インフラ**: Cloudflare Pages + D1 (SQLite) + Cloudflare Access
+- **ORM**: Drizzle ORM
+- **スタイリング**: Tailwind CSS + shadcn/ui
+- **外部API**: Google Books API
+- **言語**: TypeScript
+
+### ドキュメント
+
+詳細な技術仕様やアーキテクチャについては、以下のドキュメントを参照してください：
+
+- [要件定義](./docs/01-要件定義.md) - プロジェクトの目的、機能要件、非機能要件
+- [DB定義](./docs/02-DB定義.md) - データベーススキーマとER図
+- [画面構成](./docs/03-画面構成.md) - 画面一覧とルーティング設計
+- [使用技術・実装ルール](./docs/06-使用技術・実装ルール.md) - 技術選定と実装ガイドライン
+- [ローカル開発における注意点](./docs/07-ローカル開発における注意点.md) - 開発環境のセットアップと注意事項
+
+### コスト
+
+Cloudflare の無料枠内での運用を前提としており、小規模な利用（蔵書数・ユーザー数ともに三桁未満）であればコストをかけずに運用可能です。
+
+---
+
+## English
+
+### Overview
+
 BookVault is a simple library management app for individuals or small teams. It lets you track books, lending, and user profiles. Built with Remix and Cloudflare Pages, it uses D1 for storage and supports Google Books integration and Cloudflare Access authentication.
 
+### Key Features
+
+- 📚 **Book Management**: Register, edit, and delete book information (title, author, ISBN, publisher, etc.)
+- 🔍 **Search**: Search books by title, author, publisher, or tags
+- 📖 **Loan Tracking**: Track book lending and return history
+- 🏷️ **Tag Management**: Tag books and filter by tags
+- 📱 **Google Books Integration**: Auto-fetch book information using ISBN
+- 🔐 **Authentication**: Secure authentication via Cloudflare Access
+- 👤 **User Management**: Profile settings and role management (admin/user)
+
+### Tech Stack
+
+- **Framework**: Remix (Cloudflare Pages adapter)
+- **Infrastructure**: Cloudflare Pages + D1 (SQLite) + Cloudflare Access
+- **ORM**: Drizzle ORM
+- **Styling**: Tailwind CSS + shadcn/ui
+- **External API**: Google Books API
+- **Language**: TypeScript
+
+### Documentation
+
+For detailed technical specifications, please refer to:
 - [Remix docs](https://remix.run/docs)
 - [Remix Cloudflare docs](https://remix.run/guides/vite#cloudflare)
 
