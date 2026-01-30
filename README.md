@@ -103,6 +103,17 @@ pnpm typecheck
 
 Tailwind CSS is preconfigured. Edit `app/tailwind.css` as needed.
 
+# GitHub Issue Creation
+
+Create GitHub issues from local markdown files in the `/issues` directory:
+
+```sh
+export GITHUB_TOKEN=your_token_here
+pnpm create-issues
+```
+
+See `scripts/README.md` for detailed usage instructions.
+
 # Tech Stack
 
 - Remix (Cloudflare Pages adapter)

@@ -18,7 +18,8 @@
     "migrate:local": "wrangler d1 migrations apply development-db-vault --local",
     "migrate:prod": "wrangler d1 migrations apply development-db-vault --remote",
     "seed:local": "wrangler d1 execute development-db-vault --local --file=seed.sql",
-    "seed:prod": "wrangler d1 execute development-db-vault --remote --file=seed.sql"
+    "seed:prod": "wrangler d1 execute development-db-vault --remote --file=seed.sql",
+    "create-issues": "tsx scripts/create-github-issues.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.4",
@@ -49,6 +50,7 @@
     "@remix-run/dev": "^2.15.3",
     "@tailwindcss/postcss": "^4.1.4",
     "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "^22.10.5",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/turndown": "^5.0.5",
@@ -63,6 +65,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "postcss": "^8.4.38",
     "tailwindcss": "^4.1.4",
+    "tsx": "^4.19.2",
     "typescript": "^5.1.6",
     "vite": "^6.0.0",
     "vite-tsconfig-paths": "^4.2.1",
