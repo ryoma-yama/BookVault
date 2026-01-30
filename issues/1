@@ -1,0 +1,56 @@
+## 概要
+Remix + Cloudflare環境からLaravel 12 + PostgreSQL + Livewire 4への移行プロジェクトの第一段階として、新規Laravel 12プロジェクトのセットアップとDocker開発環境を構築します。
+
+## タスク詳細
+
+### Laravel 12プロジェクト作成
+- [ ] Composer経由でLaravel 12プロジェクトを新規作成
+- [ ] `.env`ファイルの設定（PostgreSQL接続情報）
+- [ ] Livewire 4のインストールと初期設定
+- [ ] TailwindCSSのインストールと設定
+
+### Docker環境構築
+- [ ] `docker-compose.yml`の作成
+  - PHP 8.3+コンテナ（Laravel 12要件）
+  - PostgreSQL最新版コンテナ
+  - Nginxコンテナ
+  - Redis（キャッシュ・セッション用）
+- [ ] Dockerfileの作成（PHP拡張、Composer含む）
+- [ ] ボリュームマウント設定（ソースコード、DB永続化）
+
+### 環境変数・設定
+- [ ] `.env.example`の整備
+- [ ] `APP_KEY`生成
+- [ ] DB接続情報の設定（`DB_CONNECTION=pgsql`）
+- [ ] セッション・キャッシュドライバ設定
+
+### 動作確認
+- [ ] `docker-compose up`で全コンテナが起動
+- [ ] Laravelウェルカムページが表示される
+- [ ] `php artisan migrate`が正常に実行できる
+- [ ] PostgreSQLへの接続確認
+
+## 技術要件
+- **Laravel**: 12.x
+- **PHP**: 8.3以上
+- **PostgreSQL**: 15以上
+- **Livewire**: 4.x
+- **TailwindCSS**: 3.x
+- **Docker**: 最新版
+- **Docker Compose**: v2以上
+
+## 参考ファイル
+- 現行: `wrangler.jsonc`, `package.json`
+- 移行先: `docker-compose.yml`, `Dockerfile`, `.env`
+
+## 完了条件（DoD）
+- [ ] Dockerコンテナが正常に起動する
+- [ ] Laravelアプリケーションがブラウザで表示される
+- [ ] PostgreSQLに接続できる
+- [ ] `php artisan`コマンドが実行できる
+- [ ] TailwindCSSがビルドされる
+- [ ] READMEにセットアップ手順を記載
+
+## 関連イシュー
+- Phase 1-2: データベース設計・マイグレーション作成
+- Phase 1-3: 認証システム実装
