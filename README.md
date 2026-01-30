@@ -68,9 +68,21 @@ BookVault is a simple library management app for individuals or small teams. It 
 
 ### Documentation
 
-For detailed technical specifications, please refer to:
+For detailed technical specifications and architecture, please refer to:
+
+- [Requirements (Japanese)](./docs/01-要件定義.md) - Project objectives, functional and non-functional requirements
+- [Database Schema (Japanese)](./docs/02-DB定義.md) - Database schema and ER diagrams
+- [UI Design (Japanese)](./docs/03-画面構成.md) - Screen layouts and routing design
+- [Tech Stack & Implementation Rules (Japanese)](./docs/06-使用技術・実装ルール.md) - Technology choices and implementation guidelines
+- [Local Development Notes (Japanese)](./docs/07-ローカル開発における注意点.md) - Development environment setup and considerations
+
+External references:
 - [Remix docs](https://remix.run/docs)
 - [Remix Cloudflare docs](https://remix.run/guides/vite#cloudflare)
+
+### Cost
+
+This application is designed to run within Cloudflare's free tier. For small-scale usage (less than a few hundred books and users), it can be operated at no cost.
 
 # Development
 
