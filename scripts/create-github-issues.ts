@@ -11,7 +11,7 @@
  *   GITHUB_REPOSITORY - Repository in format "owner/repo" (optional, defaults to current repo)
  */
 
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, access } from "node:fs/promises";
 import { join } from "node:path";
 
 interface IssueData {
@@ -38,9 +38,9 @@ function parseIssueFile(filename: string, content: string): IssueData {
     const firstHeading = content.match(/^#{1,2}\s+(.+)$/m);
     if (firstHeading) {
       const headingText = firstHeading[1];
-      // If the heading is generic like "概要" (overview), create a descriptive title
-      if (headingText === '概要' || headingText === 'Overview') {
-        title = `[Phase 1-1] Laravel 12プロジェクトのセットアップとDocker環境構築`;
+      // Use the heading text as title, or create a numbered title if heading is too generic
+      if (headingText === '概要' || headingText === 'Overview' || headingText === 'Summary') {
+        title = `Issue #${title}`;
       } else {
         title = headingText;
       }
@@ -97,11 +97,10 @@ async function createGitHubIssue(
   );
   
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to create issue: ${response.status} ${error}`);
+    throw new Error(`Failed to create issue: ${response.status} ${response.statusText}`);
   }
   
-  const data = await response.json();
+  const data = await response.json() as { number: number; html_url: string };
   console.log(`✓ Created issue #${data.number}: ${issueData.title}`);
   console.log(`  URL: ${data.html_url}`);
 }
@@ -125,7 +124,7 @@ async function main() {
     try {
       const { execSync } = await import('node:child_process');
       const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
-      const match = remoteUrl.match(/github\.com[:/](.+?)\.git$/);
+      const match = remoteUrl.match(/github\.com[:/](.+?)(\.git)?$/);
       if (match) {
         repo = match[1];
       }
@@ -142,8 +141,17 @@ async function main() {
   
   console.log(`Creating issues for repository: ${repo}\n`);
   
-  // Read all files from issues directory
+  // Check if issues directory exists
   const issuesDir = join(process.cwd(), 'issues');
+  try {
+    await access(issuesDir);
+  } catch (error) {
+    console.error(`Error: Issues directory not found at ${issuesDir}`);
+    console.error('Please create the directory and add issue files to it.');
+    process.exit(1);
+  }
+  
+  // Read all files from issues directory
   const files = await readdir(issuesDir);
   
   let createdCount = 0;
